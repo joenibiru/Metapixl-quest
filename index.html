@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Styles/style.css">
+    <title>Metapixl - L'Odyssee Lozerienne</title>
+</head>
+<body>
+<div id="game-container">
+        <canvas id="game-canvas" width="640" height="480"></canvas>
+        
+        <div id="ui-overlay">
+            <div id="hud">
+                <div class="hud-section">
+                    <div class="hearts">
+                        <div class="heart"></div>
+                        <div class="heart"></div>
+                        <div class="heart"></div>
+                    </div>
+                </div>
+                <div class="hud-section">
+                    <span id="location-name">MARVEJOLS</span>
+                </div>
+                <div class="hud-section">
+                    <span id="quest-progress">Artefacts: 0/9</span>
+                </div>
+            </div>
+            
+            <button id="music-toggle">MUSIQUE: ON</button>
+            
+            <div id="minimap">
+                <canvas id="minimap-canvas" width="120" height="100"></canvas>
+            </div>
+            
+            <div id="inventory-bar"></div>
+            <div class="scanlines"></div>
+        </div>
+        
+        <div id="dialog-box">
+            <span id="speaker-name">???</span>
+            <p id="dialog-text"></p>
+            <span id="dialog-continue">ESPACE</span>
+        </div>
+        
+        <div id="quiz-panel">
+            <h2 id="quiz-title">ENIGME RETRO</h2>
+            <p id="quiz-question"></p>
+            <div class="quiz-options" id="quiz-options"></div>
+        </div>
+        
+        <div id="intro-screen">
+            <div id="intro-content">
+                <p id="intro-text"></p>
+                <span id="intro-continue">CLIC pour CONTINUER</span>
+            </div>
+        </div>
+        
+        <div id="menu-screen" class="hidden">
+            <div class="title-container">
+                <h1 class="title-main">METAPIXL</h1>
+                <h2 class="title-sub">L'Odyssee Lozerienne</h2>
+                <p class="title-lozere">De Marvejols au Mont Aigoual</p>
+            </div>
+            
+            <div class="characters-preview">
+                <div class="char-preview">
+                    <canvas class="char-sprite-preview" id="preview-julien" width="48" height="48"></canvas>
+                    <span class="char-name">JULIEN</span>
+                </div>
+                <div class="char-preview">
+                    <canvas class="char-sprite-preview" id="preview-orl" width="48" height="48"></canvas>
+                    <span class="char-name">ORL</span>
+                </div>
+                <div class="char-preview">
+                    <canvas class="char-sprite-preview" id="preview-gwana" width="48" height="48"></canvas>
+                    <span class="char-name">GWANA</span>
+                </div>
+                <div class="char-preview">
+                    <canvas class="char-sprite-preview" id="preview-joe" width="48" height="48"></canvas>
+                    <span class="char-name">JOE</span>
+                </div>
+            </div>
+            
+            <button id="start-btn">COMMENCER L'AVENTURE</button>
+            
+            <p class="controls-hint">
+                Fleches ou ZQSD pour se deplacer - ESPACE pour interagir
+            </p>
+        </div>
+        
+        <div id="victory-screen">
+            <h1 class="victory-title">CAVERNE DU GLITCH</h1>
+            <div id="database-scene">
+                <canvas id="database-canvas" width="200" height="150" style="image-rendering: pixelated; margin: 20px auto; display: block; border: 3px solid #9b59b6;"></canvas>
+            </div>
+            <p class="victory-text" id="victory-text-content">
+                Vous descendez dans les profondeurs de la Caverne du Glitch...<br><br>
+                Une silhouette grise et pixelisee emerge de l'obscurite...
+            </p>
+            <button id="next-scene-btn" style="display:none;">CONTINUER</button>
+            <button id="restart-btn" style="display:none;">REJOUER</button>
+        </div>
+    </div>
+
+    <!-- Musique de fond -->
+    <audio id="background-music" loop preload="auto">
+        <source src="Legendary_Dawn.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- Musique d'intro -->
+    <audio id="intro-music" loop preload="auto" autoplay>
+        <source src="Pixel_Prologue.mp3" type="audio/mpeg">
+    </audio>
+    <script src="/Javascript/quest.js"></script>
+</body>
+</html>
