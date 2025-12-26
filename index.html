@@ -8,7 +8,15 @@
     <title>Metapixl - L'Odyssee Lozerienne</title>
 </head>
 <body>
-<div id="game-container">
+ <!-- Musiques -->
+    <audio id="background-music" loop preload="auto">
+        <source src="/Musiques/Legendary_Dawn.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="intro-music" loop preload="auto" autoplay>
+        <source src="/Musiques/Pixel_Prologue.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div id="game-container">
         <canvas id="game-canvas" width="640" height="480"></canvas>
         
         <div id="ui-overlay">
@@ -31,7 +39,7 @@
             <button id="music-toggle">MUSIQUE: ON</button>
             
             <div id="minimap">
-                <canvas id="minimap-canvas" width="120" height="100"></canvas>
+                <canvas id="minimap-canvas" width="100" height="80"></canvas>
             </div>
             
             <div id="inventory-bar"></div>
@@ -41,7 +49,7 @@
         <div id="dialog-box">
             <span id="speaker-name">???</span>
             <p id="dialog-text"></p>
-            <span id="dialog-continue">ESPACE</span>
+            <span id="dialog-continue">▼ ESPACE / TAP</span>
         </div>
         
         <div id="quiz-panel">
@@ -53,7 +61,7 @@
         <div id="intro-screen">
             <div id="intro-content">
                 <p id="intro-text"></p>
-                <span id="intro-continue">CLIC pour CONTINUER</span>
+                <span id="intro-continue">▼ Clic pour Continuer</span>
             </div>
         </div>
         
@@ -66,53 +74,49 @@
             
             <div class="characters-preview">
                 <div class="char-preview">
-                    <canvas class="char-sprite-preview" id="preview-julien" width="48" height="48"></canvas>
+                    <canvas class="char-sprite-preview" id="preview-julien" width="40" height="40"></canvas>
                     <span class="char-name">JULIEN</span>
                 </div>
                 <div class="char-preview">
-                    <canvas class="char-sprite-preview" id="preview-orl" width="48" height="48"></canvas>
+                    <canvas class="char-sprite-preview" id="preview-orl" width="40" height="40"></canvas>
                     <span class="char-name">ORL</span>
                 </div>
                 <div class="char-preview">
-                    <canvas class="char-sprite-preview" id="preview-gwana" width="48" height="48"></canvas>
+                    <canvas class="char-sprite-preview" id="preview-gwana" width="40" height="40"></canvas>
                     <span class="char-name">GWANA</span>
                 </div>
                 <div class="char-preview">
-                    <canvas class="char-sprite-preview" id="preview-joe" width="48" height="48"></canvas>
+                    <canvas class="char-sprite-preview" id="preview-joe" width="40" height="40"></canvas>
                     <span class="char-name">JOE</span>
                 </div>
             </div>
             
             <button id="start-btn">COMMENCER L'AVENTURE</button>
             
-            <p class="controls-hint">
-                Fleches ou ZQSD pour se deplacer - ESPACE pour interagir
-            </p>
+            <p class="controls-hint">Fleches/ZQSD + ESPACE | Mobile: D-Pad + Bouton Action</p>
         </div>
         
         <div id="victory-screen">
             <h1 class="victory-title">CAVERNE DU GLITCH</h1>
-            <div id="database-scene">
-                <canvas id="database-canvas" width="200" height="150" style="image-rendering: pixelated; margin: 20px auto; display: block; border: 3px solid #9b59b6;"></canvas>
-            </div>
-            <p class="victory-text" id="victory-text-content">
-                Vous descendez dans les profondeurs de la Caverne du Glitch...<br><br>
-                Une silhouette grise et pixelisee emerge de l'obscurite...
-            </p>
+            <canvas id="database-canvas" width="200" height="150"></canvas>
+            <p class="victory-text" id="victory-text-content"></p>
             <button id="next-scene-btn" style="display:none;">CONTINUER</button>
             <button id="restart-btn" style="display:none;">REJOUER</button>
         </div>
     </div>
-
-    <!-- Musique de fond -->
-    <audio id="background-music" loop preload="auto">
-        <source src="/Musiques/Legendary_Dawn.mp3" type="audio/mpeg">
-    </audio>
     
-    <!-- Musique d'intro -->
-    <audio id="intro-music" loop preload="auto" autoplay>
-        <source src="/Musiques/Pixel_Prologue.mp3" type="audio/mpeg">
-    </audio>
+    <!-- Controles tactiles -->
+    <div id="touch-controls">
+        <div id="dpad">
+            <div class="dpad-btn" id="dpad-up">▲</div>
+            <div class="dpad-btn" id="dpad-down">▼</div>
+            <div class="dpad-btn" id="dpad-left">◀</div>
+            <div class="dpad-btn" id="dpad-right">▶</div>
+            <div id="dpad-center"></div>
+        </div>
+        <button id="action-btn">ACTION</button>
+    </div>
+
     <script src="/Javascript/quest.js"></script>
 </body>
 </html>

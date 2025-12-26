@@ -1,4 +1,4 @@
-  // ===== SYSTEME AUDIO =====
+        // ===== SYSTEME AUDIO =====
         var bgMusic = document.getElementById('background-music');
         var introMusic = document.getElementById('intro-music');
         var musicEnabled = true;
@@ -6,52 +6,36 @@
         
         function initAudio() {
             if (audioCtx) return;
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            } catch(e) {
-                console.log('Audio non supporte');
-            }
+            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
         }
         
         function startIntroMusic() {
             if (introMusic && musicEnabled) {
                 introMusic.volume = 0.5;
-                introMusic.play().catch(function(e) {
-                    console.log('Autoplay bloque');
-                });
+                introMusic.play().catch(function(e) {});
             }
         }
         
         function stopIntroMusic() {
-            if (introMusic) {
-                introMusic.pause();
-                introMusic.currentTime = 0;
-            }
+            if (introMusic) { introMusic.pause(); introMusic.currentTime = 0; }
         }
         
         function startMusic() {
             if (bgMusic && musicEnabled) {
                 bgMusic.volume = 0.5;
-                bgMusic.play().catch(function(e) {
-                    console.log('Autoplay bloque, cliquez pour jouer');
-                });
+                bgMusic.play().catch(function(e) {});
             }
         }
         
         function stopMusic() {
-            if (bgMusic) {
-                bgMusic.pause();
-            }
+            if (bgMusic) bgMusic.pause();
         }
         
         function toggleMusic() {
             musicEnabled = !musicEnabled;
             if (musicEnabled) {
-                if (gameState.started) {
-                    startMusic();
-                } else if (!document.getElementById('intro-screen').classList.contains('hidden')) {
-                    startIntroMusic();
-                }
+                if (gameState.started) startMusic();
+                else if (!document.getElementById('intro-screen').classList.contains('hidden')) startIntroMusic();
             } else {
                 stopMusic();
                 stopIntroMusic();
@@ -64,16 +48,12 @@
             try {
                 var osc = audioCtx.createOscillator();
                 var gain = audioCtx.createGain();
-                
                 osc.type = type || 'square';
                 osc.frequency.value = freq;
-                
                 gain.gain.setValueAtTime(volume || 0.1, startTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-                
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                
                 osc.start(startTime);
                 osc.stop(startTime + duration);
             } catch(e) {}
@@ -85,45 +65,37 @@
             try {
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 var now = audioCtx.currentTime;
-                
-                if (type === 'dialog') {
-                    playNote(600, 0.08, 'square', now, 0.1);
-                } else if (type === 'success') {
-                    playNote(523, 0.15, 'square', now, 0.15);
-                    playNote(659, 0.15, 'square', now + 0.1, 0.15);
-                    playNote(784, 0.2, 'square', now + 0.2, 0.15);
-                } else if (type === 'error') {
-                    playNote(200, 0.3, 'sawtooth', now, 0.1);
-                } else if (type === 'step') {
-                    playNote(100 + Math.random() * 50, 0.05, 'triangle', now, 0.03);
-                }
+                if (type === 'dialog') playNote(600, 0.08, 'square', now, 0.1);
+                else if (type === 'success') { playNote(523, 0.15, 'square', now, 0.15); playNote(659, 0.15, 'square', now + 0.1, 0.15); playNote(784, 0.2, 'square', now + 0.2, 0.15); }
+                else if (type === 'error') playNote(200, 0.3, 'sawtooth', now, 0.1);
+                else if (type === 'step') playNote(100 + Math.random() * 50, 0.05, 'triangle', now, 0.03);
             } catch(e) {}
         }
         
-        // ===== CONFIGURATION DU JEU =====
-        const TILE_SIZE = 32;
-        const MAP_WIDTH = 50;
-        const MAP_HEIGHT = 40;
-        const CANVAS_WIDTH = 640;
-        const CANVAS_HEIGHT = 480;
+        // ===== CONFIGURATION =====
+        var TILE_SIZE = 32;
+        var MAP_WIDTH = 50;
+        var MAP_HEIGHT = 40;
+        var CANVAS_WIDTH = 640;
+        var CANVAS_HEIGHT = 480;
         
-        const COLORS = {
-            grass: ['#3d9970', '#2ecc71', '#27ae60'],
+        var COLORS = {
+            grass: ['#3d9970', '#2ecc71', '#27ae60', '#229954'],
             path: ['#8b7355', '#a08060', '#6b5344'],
-            water: ['#3498db', '#2980b9', '#1f618d'],
-            mountain: ['#7f8c8d', '#95a5a6', '#6c7a7d'],
-            forest: ['#1e5631', '#2d6a4f', '#1b4332'],
+            water: ['#3498db', '#2980b9', '#1f618d', '#5dade2'],
+            mountain: ['#7f8c8d', '#95a5a6', '#6c7a7d', '#566573'],
+            forest: ['#1e5631', '#2d6a4f', '#1b4332', '#145a32'],
             building: ['#c0392b', '#a93226', '#922b21'],
             roof: ['#8e44ad', '#7d3c98', '#6c3483'],
-            snow: ['#ecf0f1', '#d5dbdb', '#bfc9ca'],
+            snow: ['#ecf0f1', '#d5dbdb', '#bfc9ca', '#ffffff'],
             causses: ['#d4b896', '#c4a882', '#b89b6f']
         };
         
-        const CHARACTERS = {
-            julien: { name: 'Julien', colors: { hair: '#5d4e37', skin: '#f5cba7', shirt: '#3498db', pants: '#2c3e50' }, role: "L'Expert Linux" },
-            orl: { name: 'ORL', colors: { hair: '#1a1a1a', skin: '#e0c4a8', shirt: '#e74c3c', pants: '#1a1a1a' }, role: "Le Couteau Suisse du Retrogaming" },
-            gwana: { name: 'Gwana', colors: { hair: '#8b4513', skin: '#d4a574', shirt: '#27ae60', pants: '#2c3e50' }, role: "Le Modeur Fou" },
-            joe: { name: 'Joe', colors: { hair: '#d4a017', skin: '#fad6a5', shirt: '#9b59b6', pants: '#34495e' }, role: "Le Collectionneur" }
+        var CHARACTERS = {
+            julien: { name: 'Julien', colors: { hair: '#5d4e37', hairLight: '#7a6b54', skin: '#f5cba7', skinShade: '#e0b090', shirt: '#3498db', shirtShade: '#2980b9', pants: '#2c3e50', pantsShade: '#1a252f', eyes: '#2c3e50' }, role: "L'Expert Linux" },
+            orl: { name: 'ORL', colors: { hair: '#1a1a1a', hairLight: '#333333', skin: '#e0c4a8', skinShade: '#c9a87c', shirt: '#e74c3c', shirtShade: '#c0392b', pants: '#1a1a1a', pantsShade: '#0d0d0d', eyes: '#1a1a1a' }, role: "Le Couteau Suisse" },
+            gwana: { name: 'Gwana', colors: { hair: '#8b4513', hairLight: '#a0522d', skin: '#d4a574', skinShade: '#b8956a', shirt: '#27ae60', shirtShade: '#1e8449', pants: '#2c3e50', pantsShade: '#1a252f', eyes: '#1e5631' }, role: "Le Modeur Fou" },
+            joe: { name: 'Joe', colors: { hair: '#d4a017', hairLight: '#f1c40f', skin: '#fad6a5', skinShade: '#e5c08a', shirt: '#9b59b6', shirtShade: '#7d3c98', pants: '#34495e', pantsShade: '#2c3e50', eyes: '#4a235a' }, role: "Le Collectionneur" }
         };
         
         const VILLAGES = [
@@ -232,7 +204,7 @@
             }
         ];
         
-        let gameState = {
+       var gameState = {
             started: false,
             currentVillage: 0,
             fragments: 0,
@@ -254,120 +226,252 @@
             canMove: true,
             dialogTyping: false,
             typeInterval: null,
-            lastStepTime: 0
+            lastStepTime: 0,
+            touchDir: { x: 0, y: 0 }
         };
         
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
+        var canvas = document.getElementById('game-canvas');
+        var ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
         
-        const minimapCanvas = document.getElementById('minimap-canvas');
-        const minimapCtx = minimapCanvas.getContext('2d');
+        var minimapCanvas = document.getElementById('minimap-canvas');
+        var minimapCtx = minimapCanvas.getContext('2d');
         minimapCtx.imageSmoothingEnabled = false;
         
+        // ===== GENERATION MAP =====
         function generateMap() {
-            const map = [];
-            for (let y = 0; y < MAP_HEIGHT; y++) {
+            var map = [];
+            for (var y = 0; y < MAP_HEIGHT; y++) {
                 map[y] = [];
-                for (let x = 0; x < MAP_WIDTH; x++) {
-                    let tile = 'grass';
+                for (var x = 0; x < MAP_WIDTH; x++) {
+                    var tile = 'grass';
                     
+                    // Rivieres
                     if (y >= 24 && y <= 26 && x >= 5 && x <= 26 && Math.abs(y - 25 + Math.sin(x * 0.3)) < 1.5) tile = 'water';
                     if (x >= 40 && x <= 44 && y >= 5 && y <= 20 && Math.abs(x - 42 + Math.sin(y * 0.3)) < 1.5) tile = 'water';
                     if (y >= 28 && y <= 35 && x >= 28 && x <= 40 && Math.abs(y - 31 + Math.sin(x * 0.2) * 2) < 1.5) tile = 'water';
                     
+                    // Montagnes
                     if (x < 15 && y < 15 && Math.random() < 0.6) tile = 'mountain';
                     if (x > 35 && y > 20 && y < 32 && Math.random() < 0.5) tile = 'mountain';
                     if (y > 35) { tile = 'mountain'; if (x >= 26 && x <= 32) tile = 'snow'; }
                     
+                    // Causses et forets
                     if (y >= 28 && y <= 35 && x >= 10 && x <= 28 && Math.random() < 0.4 && tile === 'grass') tile = 'causses';
                     if (Math.random() < 0.12 && tile === 'grass') tile = 'forest';
                     
+                    // Chemins
                     VILLAGES.forEach(function(v, i) {
                         var dist = Math.sqrt(Math.pow(x - v.x, 2) + Math.pow(y - v.y, 2));
                         if (dist < 3) tile = 'path';
-                        
                         if (VILLAGES[i + 1]) {
                             var next = VILLAGES[i + 1];
-                            var dx = next.x - v.x;
-                            var dy = next.y - v.y;
+                            var dx = next.x - v.x, dy = next.y - v.y;
                             for (var t = 0; t <= 1; t += 0.02) {
-                                var px = v.x + dx * t;
-                                var py = v.y + dy * t;
+                                var px = v.x + dx * t, py = v.y + dy * t;
                                 if (Math.abs(x - px) < 1.2 && Math.abs(y - py) < 1.2 && tile !== 'water') tile = 'path';
                             }
                         }
                     });
-                    
                     map[y][x] = tile;
                 }
             }
             return map;
         }
         
+        // ===== DESSIN TILES AMELIORES =====
         function drawTile(x, y, type, time) {
             var px = x * TILE_SIZE - gameState.cameraX;
             var py = y * TILE_SIZE - gameState.cameraY;
             if (px < -TILE_SIZE || px > CANVAS_WIDTH || py < -TILE_SIZE || py > CANVAS_HEIGHT) return;
             
             var colors = COLORS[type] || COLORS.grass;
+            
+            // Base
             ctx.fillStyle = colors[0];
             ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
             
             if (type === 'grass') {
+                // Variations herbe
                 ctx.fillStyle = colors[1];
-                for (var i = 0; i < 3; i++) {
-                    ctx.fillRect(px + 4 + i * 10 + Math.sin(time/500 + x + i) * 2, py + 10 + i * 7, 2, 6);
+                for (var i = 0; i < 4; i++) {
+                    var gx = px + 3 + (i * 8) + Math.sin(time/600 + x + i) * 1.5;
+                    var gy = py + 8 + (i % 2) * 12;
+                    ctx.fillRect(gx, gy, 2, 5 + Math.sin(time/400 + i) * 2);
+                }
+                // Fleurs occasionnelles
+                if ((x + y) % 7 === 0) {
+                    ctx.fillStyle = '#f1c40f';
+                    ctx.fillRect(px + 14, py + 14, 4, 4);
                 }
             } else if (type === 'water') {
+                // Vagues animees
+                var wave = Math.sin(time/250 + x * 0.5) * 3;
+                ctx.fillStyle = colors[3];
+                ctx.fillRect(px, py + 6 + wave, TILE_SIZE, 6);
                 ctx.fillStyle = colors[1];
-                var wave = Math.sin(time/300 + x * 0.5) * 3;
-                ctx.fillRect(px, py + 10 + wave, TILE_SIZE, 4);
+                ctx.fillRect(px, py + 16 + wave * 0.5, TILE_SIZE, 4);
+                // Reflets
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx.fillRect(px + 8 + wave, py + 4, 8, 2);
             } else if (type === 'forest') {
+                // Tronc avec details
                 ctx.fillStyle = '#5d4e37';
-                ctx.fillRect(px + 12, py + 18, 8, 14);
+                ctx.fillRect(px + 13, py + 16, 6, 16);
+                ctx.fillStyle = '#4a3c2a';
+                ctx.fillRect(px + 13, py + 16, 2, 16);
+                // Feuillage multicouche
+                ctx.fillStyle = colors[2];
+                ctx.beginPath();
+                ctx.arc(px + 16, py + 14, 11, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.fillStyle = colors[0];
                 ctx.beginPath();
-                ctx.arc(px + 16, py + 12, 12, 0, Math.PI * 2);
+                ctx.arc(px + 14, py + 12, 8, 0, Math.PI * 2);
                 ctx.fill();
-            } else if (type === 'mountain' || type === 'snow') {
-                ctx.fillStyle = type === 'snow' ? '#fff' : colors[1];
-                ctx.beginPath();
-                ctx.moveTo(px + 16, py + 4);
-                ctx.lineTo(px + 28, py + 28);
-                ctx.lineTo(px + 4, py + 28);
-                ctx.fill();
-            } else if (type === 'path') {
                 ctx.fillStyle = colors[1];
-                ctx.fillRect(px + 3, py + 8, 6, 4);
-                ctx.fillRect(px + 15, py + 20, 6, 4);
+                ctx.beginPath();
+                ctx.arc(px + 18, py + 10, 6, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'mountain') {
+                // Montagne avec ombrage
+                ctx.fillStyle = colors[3];
+                ctx.beginPath();
+                ctx.moveTo(px + 16, py + 2);
+                ctx.lineTo(px + 30, py + 30);
+                ctx.lineTo(px + 2, py + 30);
+                ctx.fill();
+                ctx.fillStyle = colors[1];
+                ctx.beginPath();
+                ctx.moveTo(px + 16, py + 2);
+                ctx.lineTo(px + 16, py + 30);
+                ctx.lineTo(px + 30, py + 30);
+                ctx.fill();
+                // Neige au sommet
+                ctx.fillStyle = '#ecf0f1';
+                ctx.beginPath();
+                ctx.moveTo(px + 16, py + 2);
+                ctx.lineTo(px + 22, py + 10);
+                ctx.lineTo(px + 10, py + 10);
+                ctx.fill();
+            } else if (type === 'snow') {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.moveTo(px + 16, py);
+                ctx.lineTo(px + 32, py + 32);
+                ctx.lineTo(px, py + 32);
+                ctx.fill();
+                ctx.fillStyle = '#d5dbdb';
+                ctx.beginPath();
+                ctx.moveTo(px + 16, py);
+                ctx.lineTo(px + 16, py + 32);
+                ctx.lineTo(px + 32, py + 32);
+                ctx.fill();
+                // Brillance
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.fillRect(px + 10, py + 8, 4, 4);
+            } else if (type === 'path') {
+                // Chemin avec cailloux
+                ctx.fillStyle = colors[1];
+                ctx.fillRect(px + 2, py + 6, 8, 5);
+                ctx.fillRect(px + 14, py + 18, 10, 6);
+                ctx.fillRect(px + 22, py + 6, 6, 5);
+                ctx.fillStyle = colors[2];
+                ctx.fillRect(px + 6, py + 22, 5, 4);
+            } else if (type === 'causses') {
+                ctx.fillStyle = colors[1];
+                ctx.fillRect(px + 2, py + 2, 12, 6);
+                ctx.fillRect(px + 18, py + 14, 10, 8);
+                ctx.fillStyle = colors[2];
+                ctx.fillRect(px + 8, py + 22, 8, 6);
             }
         }
         
+        // ===== SPRITES PERSONNAGES AMELIORES =====
         function drawCharacter(x, y, char, direction, frame, isPlayer) {
             var px = x - gameState.cameraX;
             var py = y - gameState.cameraY;
-            var colors = char.colors;
+            var c = char.colors;
             var bounce = isPlayer ? Math.sin(frame * 0.3) * 2 : 0;
+            var walkCycle = Math.sin(frame * 0.4) * 3;
             
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            // Ombre
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
             ctx.beginPath();
-            ctx.ellipse(px + 16, py + 30, 10, 4, 0, 0, Math.PI * 2);
+            ctx.ellipse(px + 16, py + 31, 11, 5, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            ctx.fillStyle = colors.pants;
-            ctx.fillRect(px + 8, py + 20 + bounce, 16, 10);
-            ctx.fillStyle = colors.shirt;
-            ctx.fillRect(px + 6, py + 10 + bounce, 20, 12);
-            ctx.fillStyle = colors.skin;
-            ctx.fillRect(px + 8, py + 2 + bounce, 16, 12);
-            ctx.fillStyle = colors.hair;
-            ctx.fillRect(px + 6, py + bounce, 20, 6);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(px + 11, py + 6 + bounce, 3, 3);
-            ctx.fillRect(px + 18, py + 6 + bounce, 3, 3);
+            // Jambes avec animation de marche
+            ctx.fillStyle = c.pants;
+            if (isPlayer && (gameState.touchDir.x !== 0 || gameState.touchDir.y !== 0 || keys['arrowup'] || keys['arrowdown'] || keys['arrowleft'] || keys['arrowright'] || keys['z'] || keys['q'] || keys['s'] || keys['d'])) {
+                // Jambe gauche
+                ctx.fillRect(px + 8, py + 22 + bounce, 6, 8 + walkCycle);
+                // Jambe droite
+                ctx.fillRect(px + 18, py + 22 + bounce, 6, 8 - walkCycle);
+            } else {
+                ctx.fillRect(px + 8, py + 22 + bounce, 6, 8);
+                ctx.fillRect(px + 18, py + 22 + bounce, 6, 8);
+            }
+            // Ombre jambes
+            ctx.fillStyle = c.pantsShade;
+            ctx.fillRect(px + 8, py + 26 + bounce, 2, 4);
+            ctx.fillRect(px + 18, py + 26 + bounce, 2, 4);
+            
+            // Corps
+            ctx.fillStyle = c.shirt;
+            ctx.fillRect(px + 6, py + 10 + bounce, 20, 13);
+            // Ombre corps
+            ctx.fillStyle = c.shirtShade;
+            ctx.fillRect(px + 6, py + 10 + bounce, 4, 13);
+            ctx.fillRect(px + 6, py + 19 + bounce, 20, 4);
+            
+            // Bras avec animation
+            var armSwing = isPlayer ? Math.sin(frame * 0.4) * 4 : 0;
+            ctx.fillStyle = c.shirt;
+            ctx.fillRect(px + 2, py + 12 + bounce + armSwing, 5, 10);
+            ctx.fillRect(px + 25, py + 12 + bounce - armSwing, 5, 10);
+            ctx.fillStyle = c.shirtShade;
+            ctx.fillRect(px + 2, py + 18 + bounce + armSwing, 5, 4);
+            ctx.fillRect(px + 25, py + 18 + bounce - armSwing, 5, 4);
+            
+            // Mains
+            ctx.fillStyle = c.skin;
+            ctx.fillRect(px + 2, py + 20 + bounce + armSwing, 5, 4);
+            ctx.fillRect(px + 25, py + 20 + bounce - armSwing, 5, 4);
+            
+            // Tete
+            ctx.fillStyle = c.skin;
+            ctx.fillRect(px + 8, py + 2 + bounce, 16, 10);
+            // Ombre visage
+            ctx.fillStyle = c.skinShade;
+            ctx.fillRect(px + 8, py + 8 + bounce, 16, 4);
+            
+            // Cheveux
+            ctx.fillStyle = c.hair;
+            ctx.fillRect(px + 6, py + bounce, 20, 5);
+            ctx.fillRect(px + 6, py + 2 + bounce, 3, 6);
+            ctx.fillRect(px + 23, py + 2 + bounce, 3, 6);
+            // Reflet cheveux
+            ctx.fillStyle = c.hairLight;
+            ctx.fillRect(px + 10, py + 1 + bounce, 8, 2);
+            
+            // Yeux avec direction
+            ctx.fillStyle = c.eyes || '#000';
+            var eyeOffsetX = direction === 'left' ? -2 : direction === 'right' ? 2 : 0;
+            var eyeOffsetY = direction === 'up' ? -1 : direction === 'down' ? 1 : 0;
+            ctx.fillRect(px + 10 + eyeOffsetX, py + 5 + bounce + eyeOffsetY, 3, 3);
+            ctx.fillRect(px + 19 + eyeOffsetX, py + 5 + bounce + eyeOffsetY, 3, 3);
+            // Reflet yeux
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(px + 11 + eyeOffsetX, py + 5 + bounce + eyeOffsetY, 1, 1);
+            ctx.fillRect(px + 20 + eyeOffsetX, py + 5 + bounce + eyeOffsetY, 1, 1);
+            
+            // Bouche
+            ctx.fillStyle = c.skinShade;
+            ctx.fillRect(px + 13, py + 9 + bounce, 6, 1);
         }
         
+        // ===== NPC AMELIORES =====
         function drawNPC(village, index) {
             var px = village.x * TILE_SIZE - gameState.cameraX + 32;
             var py = village.y * TILE_SIZE - gameState.cameraY;
@@ -375,34 +479,80 @@
             
             var completed = index < gameState.currentVillage;
             var current = index === gameState.currentVillage;
-            var npcColors = ['#8e44ad', '#e74c3c', '#3498db', '#27ae60', '#f39c12', '#1abc9c', '#9b59b6', '#e67e22', '#2ecc71'];
+            var npc = village.npc;
+            var float = Math.sin(gameState.animationTime / 300) * 2;
             
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            // Ombre
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
             ctx.beginPath();
-            ctx.ellipse(px + 16, py + 30, 10, 4, 0, 0, Math.PI * 2);
+            ctx.ellipse(px + 16, py + 32, 12, 5, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            ctx.fillStyle = npcColors[index];
-            ctx.fillRect(px + 6, py + 12, 20, 18);
-            ctx.fillStyle = '#f5cba7';
-            ctx.fillRect(px + 8, py + 2, 16, 12);
-            ctx.fillStyle = '#2c3e50';
-            ctx.fillRect(px + 4, py - 2, 24, 8);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(px + 11, py + 6, 3, 3);
-            ctx.fillRect(px + 18, py + 6, 3, 3);
+            // Robe
+            ctx.fillStyle = npc.robeColor;
+            ctx.beginPath();
+            ctx.moveTo(px + 6, py + 14);
+            ctx.lineTo(px + 26, py + 14);
+            ctx.lineTo(px + 30, py + 32);
+            ctx.lineTo(px + 2, py + 32);
+            ctx.fill();
+            // Ombre robe
+            ctx.fillStyle = npc.hatColor;
+            ctx.beginPath();
+            ctx.moveTo(px + 6, py + 14);
+            ctx.lineTo(px + 10, py + 14);
+            ctx.lineTo(px + 6, py + 32);
+            ctx.lineTo(px + 2, py + 32);
+            ctx.fill();
             
+            // Ceinture
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(px + 6, py + 20, 20, 3);
+            
+            // Tete
+            ctx.fillStyle = '#f5cba7';
+            ctx.fillRect(px + 9, py + 4, 14, 11);
+            ctx.fillStyle = '#e0b090';
+            ctx.fillRect(px + 9, py + 11, 14, 4);
+            
+            // Chapeau/capuche
+            ctx.fillStyle = npc.hatColor;
+            ctx.beginPath();
+            ctx.moveTo(px + 16, py - 6 + float);
+            ctx.lineTo(px + 28, py + 8);
+            ctx.lineTo(px + 4, py + 8);
+            ctx.fill();
+            ctx.fillStyle = npc.robeColor;
+            ctx.fillRect(px + 8, py + 4, 16, 4);
+            
+            // Yeux
+            ctx.fillStyle = '#000';
+            ctx.fillRect(px + 12, py + 7, 3, 3);
+            ctx.fillRect(px + 18, py + 7, 3, 3);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(px + 13, py + 7, 1, 1);
+            ctx.fillRect(px + 19, py + 7, 1, 1);
+            
+            // Barbe pour certains
+            if (index % 3 === 0) {
+                ctx.fillStyle = '#bdc3c7';
+                ctx.fillRect(px + 11, py + 12, 10, 4);
+                ctx.fillRect(px + 13, py + 16, 6, 3);
+            }
+            
+            // Indicateur
             if (current && !completed) {
                 ctx.fillStyle = '#f4d03f';
-                ctx.font = '16px Arial';
-                ctx.fillText('!', px + 14, py - 8 + Math.sin(gameState.animationTime / 200) * 3);
+                ctx.font = 'bold 18px Arial';
+                ctx.fillText('!', px + 13, py - 10 + float);
             } else if (completed) {
                 ctx.fillStyle = '#2ecc71';
-                ctx.font = '14px Arial';
-                ctx.fillText('OK', px + 8, py - 5);
+                ctx.font = 'bold 12px Arial';
+                ctx.fillText('✓', px + 11, py - 6);
             }
         }
         
+        // ===== VILLAGES AMELIORES =====
         function drawVillage(village, index) {
             var px = village.x * TILE_SIZE - gameState.cameraX;
             var py = village.y * TILE_SIZE - gameState.cameraY;
@@ -411,46 +561,91 @@
             var completed = index < gameState.currentVillage;
             var current = index === gameState.currentVillage;
             
-            ctx.fillStyle = completed ? '#27ae60' : (current ? '#f4d03f' : COLORS.building[0]);
-            ctx.fillRect(px - 10, py - 10, 40, 30);
-            ctx.fillStyle = COLORS.roof[0];
-            ctx.beginPath();
-            ctx.moveTo(px + 10, py - 30);
-            ctx.lineTo(px + 35, py - 10);
-            ctx.lineTo(px - 15, py - 10);
-            ctx.fill();
-            ctx.fillStyle = '#5d4e37';
-            ctx.fillRect(px + 5, py + 5, 10, 15);
-            ctx.fillStyle = '#f4d03f';
-            ctx.fillRect(px + 20, py - 2, 8, 8);
+            // Maison principale
+            var houseColor = completed ? '#27ae60' : (current ? '#f4d03f' : '#c0392b');
+            var houseShade = completed ? '#1e8449' : (current ? '#d4ac0d' : '#922b21');
             
+            // Mur
+            ctx.fillStyle = houseColor;
+            ctx.fillRect(px - 12, py - 8, 44, 32);
+            ctx.fillStyle = houseShade;
+            ctx.fillRect(px - 12, py - 8, 8, 32);
+            ctx.fillRect(px - 12, py + 16, 44, 8);
+            
+            // Toit
+            ctx.fillStyle = '#8e44ad';
+            ctx.beginPath();
+            ctx.moveTo(px + 10, py - 32);
+            ctx.lineTo(px + 38, py - 8);
+            ctx.lineTo(px - 18, py - 8);
+            ctx.fill();
+            ctx.fillStyle = '#6c3483';
+            ctx.beginPath();
+            ctx.moveTo(px + 10, py - 32);
+            ctx.lineTo(px + 10, py - 8);
+            ctx.lineTo(px + 38, py - 8);
+            ctx.fill();
+            
+            // Porte
+            ctx.fillStyle = '#5d4e37';
+            ctx.fillRect(px + 4, py + 6, 12, 18);
+            ctx.fillStyle = '#4a3c2a';
+            ctx.fillRect(px + 4, py + 6, 4, 18);
+            // Poignee
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(px + 12, py + 14, 2, 3);
+            
+            // Fenetres
+            ctx.fillStyle = '#f4d03f';
+            ctx.fillRect(px + 20, py, 10, 10);
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(px + 24, py + 2, 2, 6);
+            ctx.fillRect(px + 21, py + 4, 8, 2);
+            
+            // Cheminee
+            ctx.fillStyle = '#7f8c8d';
+            ctx.fillRect(px + 24, py - 26, 8, 12);
+            // Fumee animee
+            var smoke = Math.sin(gameState.animationTime / 400) * 3;
+            ctx.fillStyle = 'rgba(200,200,200,0.5)';
+            ctx.beginPath();
+            ctx.arc(px + 28 + smoke, py - 30, 4, 0, Math.PI * 2);
+            ctx.arc(px + 26 - smoke, py - 36, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Nom du village
             var playerDist = Math.sqrt(Math.pow(gameState.playerX/TILE_SIZE - village.x, 2) + Math.pow(gameState.playerY/TILE_SIZE - village.y, 2));
             if (playerDist < 10 || current) {
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(px - 20, py - 50, 60, 18);
                 ctx.fillStyle = current ? '#f4d03f' : '#fff';
-                ctx.font = '10px "Press Start 2P"';
+                ctx.font = '8px "Press Start 2P"';
                 ctx.textAlign = 'center';
-                ctx.fillText(village.name.toUpperCase(), px + 10, py - 38);
+                ctx.fillText(village.name.toUpperCase(), px + 10, py - 40);
                 ctx.fillStyle = '#888';
-                ctx.font = '6px "Press Start 2P"';
-                ctx.fillText(village.region, px + 10, py - 28);
+                ctx.font = '5px "Press Start 2P"';
+                ctx.fillText(village.region, px + 10, py - 34);
                 ctx.textAlign = 'left';
             }
         }
         
         function drawTeam() {
             var chars = Object.values(CHARACTERS);
-            drawCharacter(gameState.playerX, gameState.playerY, chars[0], gameState.playerDir, gameState.playerFrame, true);
-            var offsets = [{ x: -24, y: 8 }, { x: 24, y: 8 }, { x: 0, y: 24 }];
+            var offsets = [{ x: -26, y: 10 }, { x: 26, y: 10 }, { x: 0, y: 26 }];
+            
+            // Dessiner les suiveurs d'abord (derriere)
             for (var i = 1; i < chars.length; i++) {
                 drawCharacter(gameState.playerX + offsets[i-1].x, gameState.playerY + offsets[i-1].y, chars[i], gameState.playerDir, gameState.playerFrame + i * 5, false);
             }
+            // Leader en dernier (devant)
+            drawCharacter(gameState.playerX, gameState.playerY, chars[0], gameState.playerDir, gameState.playerFrame, true);
         }
         
         function drawMinimap() {
             minimapCtx.fillStyle = '#1a1a2e';
-            minimapCtx.fillRect(0, 0, 120, 100);
-            var scaleX = 120 / MAP_WIDTH;
-            var scaleY = 100 / MAP_HEIGHT;
+            minimapCtx.fillRect(0, 0, 100, 80);
+            var scaleX = 100 / MAP_WIDTH;
+            var scaleY = 80 / MAP_HEIGHT;
             
             for (var y = 0; y < MAP_HEIGHT; y += 2) {
                 for (var x = 0; x < MAP_WIDTH; x += 2) {
@@ -460,13 +655,24 @@
                 }
             }
             
+            // Chemins sur minimap
             VILLAGES.forEach(function(v, i) {
+                if (VILLAGES[i + 1]) {
+                    minimapCtx.strokeStyle = i < gameState.currentVillage ? '#2ecc71' : '#666';
+                    minimapCtx.lineWidth = 1;
+                    minimapCtx.beginPath();
+                    minimapCtx.moveTo(v.x * scaleX, v.y * scaleY);
+                    minimapCtx.lineTo(VILLAGES[i+1].x * scaleX, VILLAGES[i+1].y * scaleY);
+                    minimapCtx.stroke();
+                }
+                
                 minimapCtx.fillStyle = i < gameState.currentVillage ? '#2ecc71' : i === gameState.currentVillage ? '#f4d03f' : '#e74c3c';
                 minimapCtx.beginPath();
                 minimapCtx.arc(v.x * scaleX, v.y * scaleY, 3, 0, Math.PI * 2);
                 minimapCtx.fill();
             });
             
+            // Joueur
             minimapCtx.fillStyle = '#fff';
             minimapCtx.fillRect((gameState.playerX / TILE_SIZE) * scaleX - 2, (gameState.playerY / TILE_SIZE) * scaleY - 2, 4, 4);
         }
@@ -474,8 +680,8 @@
         function updateCamera() {
             var targetX = gameState.playerX - CANVAS_WIDTH / 2 + 16;
             var targetY = gameState.playerY - CANVAS_HEIGHT / 2 + 16;
-            gameState.cameraX += (targetX - gameState.cameraX) * 0.1;
-            gameState.cameraY += (targetY - gameState.cameraY) * 0.1;
+            gameState.cameraX += (targetX - gameState.cameraX) * 0.08;
+            gameState.cameraY += (targetY - gameState.cameraY) * 0.08;
             gameState.cameraX = Math.max(0, Math.min(gameState.cameraX, MAP_WIDTH * TILE_SIZE - CANVAS_WIDTH));
             gameState.cameraY = Math.max(0, Math.min(gameState.cameraY, MAP_HEIGHT * TILE_SIZE - CANVAS_HEIGHT));
         }
@@ -488,6 +694,7 @@
             return tile !== 'water' && tile !== 'mountain' && tile !== 'snow';
         }
         
+        // ===== CONTROLES CLAVIER =====
         var keys = {};
         document.addEventListener('keydown', function(e) {
             keys[e.key.toLowerCase()] = true;
@@ -498,16 +705,59 @@
         });
         document.addEventListener('keyup', function(e) { keys[e.key.toLowerCase()] = false; });
         
+        // ===== CONTROLES TACTILES =====
+        function setupTouchControls() {
+            var dpadBtns = ['up', 'down', 'left', 'right'];
+            dpadBtns.forEach(function(dir) {
+                var btn = document.getElementById('dpad-' + dir);
+                
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    if (dir === 'up') gameState.touchDir.y = -1;
+                    if (dir === 'down') gameState.touchDir.y = 1;
+                    if (dir === 'left') gameState.touchDir.x = -1;
+                    if (dir === 'right') gameState.touchDir.x = 1;
+                }, { passive: false });
+                
+                btn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    if (dir === 'up' || dir === 'down') gameState.touchDir.y = 0;
+                    if (dir === 'left' || dir === 'right') gameState.touchDir.x = 0;
+                }, { passive: false });
+                
+                btn.addEventListener('touchcancel', function(e) {
+                    gameState.touchDir = { x: 0, y: 0 };
+                });
+            });
+            
+            // Bouton action
+            document.getElementById('action-btn').addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                handleInteraction();
+            }, { passive: false });
+        }
+        
         function handleMovement() {
             if (!gameState.started || !gameState.canMove || gameState.inDialog || gameState.inQuiz) return;
             
             var speed = 3;
             var dx = 0, dy = 0;
             
+            // Clavier
             if (keys['arrowup'] || keys['z'] || keys['w']) { dy = -speed; gameState.playerDir = 'up'; }
             if (keys['arrowdown'] || keys['s']) { dy = speed; gameState.playerDir = 'down'; }
             if (keys['arrowleft'] || keys['q'] || keys['a']) { dx = -speed; gameState.playerDir = 'left'; }
             if (keys['arrowright'] || keys['d']) { dx = speed; gameState.playerDir = 'right'; }
+            
+            // Tactile
+            if (gameState.touchDir.x !== 0 || gameState.touchDir.y !== 0) {
+                dx = gameState.touchDir.x * speed;
+                dy = gameState.touchDir.y * speed;
+                if (gameState.touchDir.y < 0) gameState.playerDir = 'up';
+                else if (gameState.touchDir.y > 0) gameState.playerDir = 'down';
+                else if (gameState.touchDir.x < 0) gameState.playerDir = 'left';
+                else if (gameState.touchDir.x > 0) gameState.playerDir = 'right';
+            }
             
             if (dx !== 0 || dy !== 0) {
                 var newX = gameState.playerX + dx;
@@ -526,6 +776,7 @@
                 }
             }
             
+            // Mise a jour lieu
             var closestVillage = null;
             var closestDist = 999;
             VILLAGES.forEach(function(v) {
@@ -550,6 +801,7 @@
             if (dist < 4) startDialog(currentVillage);
         }
         
+        // ===== DIALOGUES =====
         function startDialog(village) {
             gameState.inDialog = true;
             gameState.dialogIndex = 0;
@@ -610,11 +862,13 @@
             document.getElementById('dialog-box').style.display = 'none';
         }
         
+        // ===== QUIZ =====
         function startQuiz(quiz, village) {
             gameState.inQuiz = true;
             gameState.currentQuiz = { quiz: quiz, village: village };
             
             document.getElementById('quiz-panel').style.display = 'block';
+            document.getElementById('quiz-title').textContent = 'ENIGME RETRO';
             document.getElementById('quiz-question').textContent = quiz.question;
             
             var options = document.getElementById('quiz-options');
@@ -645,32 +899,24 @@
                 setTimeout(function() {
                     gameState.fragments++;
                     document.getElementById('quest-progress').textContent = 'Artefacts: ' + gameState.fragments + '/9';
-                    
-                    // Ajouter l'artefact specifique du village
                     gameState.inventory.push(village.artifact);
                     updateInventory();
                     
-                    // Afficher le message de victoire dans le quiz panel
                     document.getElementById('quiz-title').textContent = 'ARTEFACT OBTENU !';
-                    document.getElementById('quiz-question').innerHTML = '<span style="color:' + village.artifact.color + '; font-size: 24px;">' + village.artifact.icon + '</span><br><br><span style="color: #f1c40f;">' + village.artifact.name + '</span>';
+                    document.getElementById('quiz-question').innerHTML = '<span style="color:' + village.artifact.color + '; font-size: 20px;">' + village.artifact.icon + '</span><br><br><span style="color: #f1c40f;">' + village.artifact.name + '</span>';
                     document.getElementById('quiz-options').innerHTML = '';
                     
                     setTimeout(function() {
-                        if (village.isFinal) {
-                            showVictory();
-                        } else {
-                            gameState.currentVillage++;
-                        }
+                        if (village.isFinal) showVictory();
+                        else gameState.currentVillage++;
                         closeQuiz();
                     }, 2000);
                 }, 1000);
             } else {
                 playSFX('error');
-                
-                // Afficher l'indice dans le quiz panel au lieu d'une alerte
                 document.getElementById('quiz-title').textContent = 'MAUVAISE REPONSE !';
                 document.getElementById('quiz-question').innerHTML = '<span style="color: #e74c3c;">Indice :</span><br><br>' + quiz.hint;
-                document.getElementById('quiz-options').innerHTML = '<button class="quiz-option" onclick="closeQuiz()" style="margin-top: 20px; background: #e74c3c; border-color: #e74c3c;">REESSAYER</button>';
+                document.getElementById('quiz-options').innerHTML = '<button class="quiz-option" onclick="closeQuiz()" style="margin-top: 15px; background: #e74c3c; border-color: #e74c3c;">REESSAYER</button>';
             }
         }
         
@@ -693,12 +939,13 @@
             }
         }
         
-       function showVictory() {
+        // ===== VICTOIRE =====
+        function showVictory() {
             stopMusic();
             startIntroMusic();
             document.getElementById('victory-screen').classList.add('active');
+            document.getElementById('touch-controls').style.display = 'none';
             
-            // Dessiner Database le Cheater Gris
             var dbCanvas = document.getElementById('database-canvas');
             var dbCtx = dbCanvas.getContext('2d');
             dbCtx.imageSmoothingEnabled = false;
@@ -707,100 +954,105 @@
             var sceneStep = 0;
             
             var dialogues = [
-                { title: "CAVERNE DU GLITCH", text: "Les 9 artefacts legendaires brillent dans votre inventaire...<br><br>Le passage vers la Caverne du Glitch s'ouvre !" },
-                { title: "CAVERNE DU GLITCH", text: "Vous descendez dans les profondeurs obscures...<br><br>Une silhouette grise et pixelisee emerge des tenebres..." },
-                { title: "DATABASE", text: "Je suis <span style='color:#9b59b6'>DATABASE</span>, le Cheater Gris...<br><br>Gardien des codes oublies et des bugs ancestraux..." },
-                { title: "DATABASE", text: "Le Rubis de Zelda... L'Anneau de Sonic...<br>Le Champignon de Mario... L'Etoile Invincible...<br><br>Vous avez reuni les reliques sacrees !" },
-                { title: "DATABASE", text: "Et cette disquette... E.T. l'Extra-Terrestre...<br><br>La <span style='color:#e74c3c'>MALEDICTION DE L'INJOUABILITE</span>...<br>Je connais les CHEAT CODES INTERDITS !" },
-                { title: "RITUAL DU GLITCH", text: "<span style='color:#2ecc71'>IDDQD... IDKFA... NOCLIP...</span><br><span style='color:#3498db'>UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A...</span><br><br>La disquette tremble... les pixels se reorganisent !" },
-                { title: "MALEDICTION LEVEE !", text: "C'EST FAIT ! La malediction est brisee !<br><br>Les gamers du monde entier pourront<br><span style='color:#f1c40f'>ENFIN TERMINER E.T.</span> !" },
-                { title: "VICTOIRE !", text: "<span style='color:#f1c40f'>METAPIXL</span> a accompli l'impossible !<br><br>Grace a <span style='color:#3498db'>Julien</span>, <span style='color:#e74c3c'>ORL</span>, <span style='color:#27ae60'>Gwana</span> et <span style='color:#9b59b6'>Joe</span>...<br>Et a <span style='color:#9b59b6'>Database</span> le Cheater Gris...<br><br>Le pire jeu de l'histoire est maintenant JOUABLE !<br><br><span style='color:#f1c40f'>FIN</span>" }
+                { title: "CAVERNE DU GLITCH", text: "Les 9 artefacts legendaires brillent...<br><br>Le passage vers la Caverne s'ouvre !" },
+                { title: "CAVERNE DU GLITCH", text: "Vous descendez dans les profondeurs...<br><br>Une silhouette grise emerge des tenebres..." },
+                { title: "DATABASE", text: "Je suis <span style='color:#9b59b6'>DATABASE</span>, le Cheater Gris...<br><br>Gardien des codes oublies..." },
+                { title: "DATABASE", text: "Le Rubis de Zelda... L'Anneau de Sonic...<br>Le Champignon... L'Etoile...<br><br>Vous avez reuni les reliques sacrees !" },
+                { title: "DATABASE", text: "Cette disquette... E.T....<br><br>La <span style='color:#e74c3c'>MALEDICTION DE L'INJOUABILITE</span>...<br>Je connais les CHEAT CODES INTERDITS !" },
+                { title: "RITUAL DU GLITCH", text: "<span style='color:#2ecc71'>IDDQD... IDKFA... NOCLIP...</span><br><span style='color:#3498db'>UP UP DOWN DOWN LEFT RIGHT B A...</span><br><br>La disquette tremble !" },
+                { title: "MALEDICTION LEVEE !", text: "C'EST FAIT ! La malediction est brisee !<br><br>Les gamers pourront <span style='color:#f1c40f'>ENFIN TERMINER E.T.</span> !" },
+                { title: "VICTOIRE !", text: "<span style='color:#f1c40f'>METAPIXL</span> a accompli l'impossible !<br><br><span style='color:#3498db'>Julien</span>, <span style='color:#e74c3c'>ORL</span>, <span style='color:#27ae60'>Gwana</span>, <span style='color:#9b59b6'>Joe</span><br>Et <span style='color:#9b59b6'>Database</span> le Cheater Gris...<br><br><span style='color:#f1c40f'>FIN</span>" }
             ];
+            
+            document.getElementById('victory-text-content').innerHTML = dialogues[0].text;
             
             function drawDatabase(frame) {
                 dbCtx.fillStyle = '#0a0a14';
                 dbCtx.fillRect(0, 0, 200, 150);
                 
-                // Effet de glitch sur le fond
-                for (var i = 0; i < 10; i++) {
+                // Glitch background
+                for (var i = 0; i < 8; i++) {
                     dbCtx.fillStyle = 'rgba(' + Math.floor(Math.random()*50) + ',0,' + Math.floor(Math.random()*80) + ',0.5)';
-                    dbCtx.fillRect(Math.random() * 200, Math.random() * 150, Math.random() * 30 + 5, 2);
+                    dbCtx.fillRect(Math.random() * 200, Math.random() * 150, Math.random() * 40, 2);
                 }
                 
                 // Caverne
                 dbCtx.fillStyle = '#2c2c54';
                 dbCtx.beginPath();
-                dbCtx.moveTo(0, 50);
-                dbCtx.lineTo(40, 20);
-                dbCtx.lineTo(100, 10);
-                dbCtx.lineTo(160, 20);
-                dbCtx.lineTo(200, 50);
+                dbCtx.moveTo(0, 40);
+                dbCtx.lineTo(50, 15);
+                dbCtx.lineTo(100, 5);
+                dbCtx.lineTo(150, 15);
+                dbCtx.lineTo(200, 40);
                 dbCtx.lineTo(200, 150);
                 dbCtx.lineTo(0, 150);
                 dbCtx.fill();
                 
-                // Database le Cheater Gris
-                var dbX = 85;
-                var dbY = 60;
+                // Database
+                var dbX = 80;
+                var dbY = 50;
                 var glitch = Math.sin(frame * 0.2) * 2;
+                var float = Math.sin(frame * 0.05) * 3;
                 
-                // Aura de glitch
+                // Aura
                 dbCtx.fillStyle = 'rgba(155, 89, 182, ' + (0.3 + Math.sin(frame * 0.1) * 0.2) + ')';
                 dbCtx.beginPath();
-                dbCtx.arc(dbX + 15, dbY + 40, 35 + Math.sin(frame * 0.15) * 5, 0, Math.PI * 2);
+                dbCtx.arc(dbX + 20, dbY + 45 + float, 40 + Math.sin(frame * 0.15) * 5, 0, Math.PI * 2);
                 dbCtx.fill();
                 
-                // Corps gris
-                dbCtx.fillStyle = '#7f8c8d';
-                dbCtx.fillRect(dbX + 5 + glitch, dbY + 35, 20, 30);
-                
-                // Robe de code
+                // Robe
                 dbCtx.fillStyle = '#5d6d7e';
-                dbCtx.fillRect(dbX + glitch, dbY + 40, 30, 40);
+                dbCtx.beginPath();
+                dbCtx.moveTo(dbX + 5 + glitch, dbY + 30 + float);
+                dbCtx.lineTo(dbX + 35 + glitch, dbY + 30 + float);
+                dbCtx.lineTo(dbX + 40 + glitch, dbY + 80 + float);
+                dbCtx.lineTo(dbX + glitch, dbY + 80 + float);
+                dbCtx.fill();
                 
                 // Tete
                 dbCtx.fillStyle = '#95a5a6';
-                dbCtx.fillRect(dbX + 5 + glitch, dbY + 10, 20, 25);
+                dbCtx.fillRect(dbX + 10 + glitch, dbY + 15 + float, 20, 18);
                 
                 // Capuche
                 dbCtx.fillStyle = '#4a4a4a';
                 dbCtx.beginPath();
-                dbCtx.moveTo(dbX + 15 + glitch, dbY);
-                dbCtx.lineTo(dbX + 30 + glitch, dbY + 20);
-                dbCtx.lineTo(dbX + glitch, dbY + 20);
+                dbCtx.moveTo(dbX + 20 + glitch, dbY + float);
+                dbCtx.lineTo(dbX + 38 + glitch, dbY + 22 + float);
+                dbCtx.lineTo(dbX + 2 + glitch, dbY + 22 + float);
                 dbCtx.fill();
                 
-                // Yeux brillants (glitch)
+                // Yeux glitch
                 var eyeColor = frame % 10 < 5 ? '#9b59b6' : '#3498db';
                 dbCtx.fillStyle = eyeColor;
-                dbCtx.fillRect(dbX + 8 + glitch, dbY + 18, 4, 4);
-                dbCtx.fillRect(dbX + 18 + glitch, dbY + 18, 4, 4);
+                dbCtx.fillRect(dbX + 13 + glitch, dbY + 22 + float, 5, 5);
+                dbCtx.fillRect(dbX + 22 + glitch, dbY + 22 + float, 5, 5);
                 
-                // Symboles de code flottants
+                // Codes flottants
                 dbCtx.fillStyle = '#2ecc71';
                 dbCtx.font = '8px monospace';
-                var codes = ['0x', '[]', '{}', ';;', '##', '**'];
-                for (var c = 0; c < 6; c++) {
-                    var cx = 20 + c * 30 + Math.sin(frame * 0.1 + c) * 10;
-                    var cy = 30 + Math.cos(frame * 0.1 + c) * 15;
+                var codes = ['0x', '{}', '[]', ';;', '##'];
+                for (var c = 0; c < 5; c++) {
+                    var cx = 15 + c * 40 + Math.sin(frame * 0.08 + c) * 10;
+                    var cy = 25 + Math.cos(frame * 0.08 + c) * 12;
                     dbCtx.fillText(codes[c], cx, cy);
                 }
                 
                 // Disquette si scene avancee
                 if (sceneStep >= 4) {
                     dbCtx.fillStyle = '#2c3e50';
-                    dbCtx.fillRect(dbX + 40, dbY + 50 + Math.sin(frame * 0.3) * 5, 25, 25);
+                    var diskY = dbY + 45 + Math.sin(frame * 0.3) * 5 + float;
+                    dbCtx.fillRect(dbX + 50, diskY, 30, 30);
                     dbCtx.fillStyle = '#ecf0f1';
-                    dbCtx.fillRect(dbX + 45, dbY + 52 + Math.sin(frame * 0.3) * 5, 15, 10);
-                    dbCtx.fillStyle = '#e74c3c';
-                    dbCtx.fillRect(dbX + 50, dbY + 65 + Math.sin(frame * 0.3) * 5, 8, 8);
+                    dbCtx.fillRect(dbX + 55, diskY + 3, 20, 12);
+                    ctx.fillStyle = '#e74c3c';
+                    dbCtx.fillRect(dbX + 62, diskY + 18, 10, 10);
                     
                     // Effet magique
                     dbCtx.strokeStyle = '#f1c40f';
                     dbCtx.lineWidth = 2;
                     for (var r = 0; r < 3; r++) {
                         dbCtx.beginPath();
-                        dbCtx.arc(dbX + 52, dbY + 62, 20 + r * 10 + frame % 20, 0, Math.PI * 2);
+                        dbCtx.arc(dbX + 65, diskY + 15, 25 + r * 12 + (frame % 25), 0, Math.PI * 2);
                         dbCtx.stroke();
                     }
                 }
@@ -816,7 +1068,6 @@
             
             animateDatabase();
             
-            // Gestion des scenes
             document.getElementById('next-scene-btn').style.display = 'block';
             document.getElementById('next-scene-btn').onclick = function() {
                 sceneStep++;
@@ -832,27 +1083,55 @@
             };
         }
         
+        // ===== PREVIEW PERSONNAGES =====
         function drawCharacterPreview(canvasId, char) {
             var c = document.getElementById(canvasId);
             if (!c) return;
             var cx = c.getContext('2d');
             cx.imageSmoothingEnabled = false;
-            cx.clearRect(0, 0, 48, 48);
+            cx.clearRect(0, 0, 40, 40);
             
-            var colors = char.colors;
-            cx.fillStyle = colors.pants;
-            cx.fillRect(16, 28, 16, 12);
-            cx.fillStyle = colors.shirt;
-            cx.fillRect(14, 18, 20, 12);
-            cx.fillStyle = colors.skin;
-            cx.fillRect(16, 8, 16, 12);
-            cx.fillStyle = colors.hair;
-            cx.fillRect(14, 6, 20, 6);
-            cx.fillStyle = '#000';
-            cx.fillRect(19, 12, 3, 3);
-            cx.fillRect(26, 12, 3, 3);
+            var col = char.colors;
+            var px = 4, py = 2;
+            
+            // Jambes
+            cx.fillStyle = col.pants;
+            cx.fillRect(px + 6, py + 22, 5, 8);
+            cx.fillRect(px + 14, py + 22, 5, 8);
+            
+            // Corps
+            cx.fillStyle = col.shirt;
+            cx.fillRect(px + 4, py + 12, 17, 11);
+            cx.fillStyle = col.shirtShade;
+            cx.fillRect(px + 4, py + 12, 4, 11);
+            
+            // Bras
+            cx.fillStyle = col.shirt;
+            cx.fillRect(px + 1, py + 13, 4, 9);
+            cx.fillRect(px + 20, py + 13, 4, 9);
+            
+            // Tete
+            cx.fillStyle = col.skin;
+            cx.fillRect(px + 6, py + 3, 13, 10);
+            
+            // Cheveux
+            cx.fillStyle = col.hair;
+            cx.fillRect(px + 4, py + 1, 17, 5);
+            cx.fillRect(px + 4, py + 3, 3, 5);
+            cx.fillRect(px + 18, py + 3, 3, 5);
+            cx.fillStyle = col.hairLight;
+            cx.fillRect(px + 8, py + 2, 6, 2);
+            
+            // Yeux
+            cx.fillStyle = col.eyes || '#000';
+            cx.fillRect(px + 8, py + 6, 3, 3);
+            cx.fillRect(px + 14, py + 6, 3, 3);
+            cx.fillStyle = '#fff';
+            cx.fillRect(px + 9, py + 6, 1, 1);
+            cx.fillRect(px + 15, py + 6, 1, 1);
         }
         
+        // ===== BOUCLE PRINCIPALE =====
         function gameLoop(timestamp) {
             gameState.animationTime = timestamp;
             
@@ -869,44 +1148,48 @@
                     }
                 }
                 
-                VILLAGES.forEach(function(village, index) {
-                    drawVillage(village, index);
-                    drawNPC(village, index);
+                // Dessiner villages et NPCs tries par Y
+                var entities = [];
+                VILLAGES.forEach(function(v, i) {
+                    entities.push({ type: 'village', data: v, index: i, y: v.y });
+                    entities.push({ type: 'npc', data: v, index: i, y: v.y + 0.5 });
+                });
+                entities.push({ type: 'team', y: gameState.playerY / TILE_SIZE });
+                
+                entities.sort(function(a, b) { return a.y - b.y; });
+                
+                entities.forEach(function(e) {
+                    if (e.type === 'village') drawVillage(e.data, e.index);
+                    else if (e.type === 'npc') drawNPC(e.data, e.index);
+                    else if (e.type === 'team') drawTeam();
                 });
                 
-                drawTeam();
                 drawMinimap();
             }
             
             requestAnimationFrame(gameLoop);
         }
         
+        // ===== INIT =====
         function init() {
             gameState.mapTiles = generateMap();
             updateInventory();
+            setupTouchControls();
             
             Object.keys(CHARACTERS).forEach(function(key) {
                 drawCharacterPreview('preview-' + key, CHARACTERS[key]);
             });
             
-            // ===== SYSTEME D'INTRO NARRATIVE =====
+            // Intro
             var introSlides = [
                 "Il y a bien longtemps, en <span class='highlight'>1982</span>...<br><br>Un jeu video fut cree dans la precipitation...<br><br>Un jeu si <span class='villain'>MAUDIT</span> que personne ne put jamais le terminer...",
-                
-                "<span class='villain'>E.T. L'EXTRA-TERRESTRE</span><br>sur Atari 2600<br><br>Developpe en seulement 5 semaines...<br>Des millions de cartouches invendues...<br>Enterrees dans le desert du Nouveau-Mexique...",
-                
-                "La <span class='villain'>MALEDICTION DE L'INJOUABILITE</span><br>fut scellee a jamais...<br><br>Aucun gamer ne pouvait finir ce jeu...<br>Les bugs, les glitches, la frustration...<br>Tout semblait perdu...",
-                
+                "<span class='villain'>E.T. L'EXTRA-TERRESTRE</span><br>sur Atari 2600<br><br>Developpe en 5 semaines...<br>Des millions de cartouches invendues...<br>Enterrees dans le desert du Nouveau-Mexique...",
+                "La <span class='villain'>MALEDICTION DE L'INJOUABILITE</span><br>fut scellee a jamais...<br><br>Aucun gamer ne pouvait finir ce jeu...",
                 "Mais une legende parlait d'un espoir...<br><br>Au coeur de la <span class='highlight'>LOZERE</span>, sous le Mont Aigoual...<br>Se cacherait la <span class='magic'>CAVERNE DU GLITCH</span>...",
-                
-                "Et dans cette caverne vivrait<br><span class='magic'>DATABASE, LE CHEATER GRIS</span><br><br>Gardien des codes oublies...<br>Maitre des cheat codes interdits...<br>Lui seul pourrait lever la malediction !",
-                
-                "En 2024, quatre amis decident d'agir...<br><br>Ils fondent la communaute<br><span class='highlight'>METAPIXL</span>",
-                
-                "<span class='character'>JULIEN</span> - L'Expert Linux<br><span class='character'>ORL</span> - Le Couteau Suisse du Retrogaming<br><span class='character'>GWANA</span> - Le Modeur Fou<br><span class='character'>JOE</span> - Le Collectionneur<br><br>Ensemble, ils retrouvent une disquette maudite...",
-                
-                "Leur mission :<br><br>Traverser toute la <span class='highlight'>LOZERE</span><br>De <span class='highlight'>MARVEJOLS</span> au <span class='highlight'>MONT AIGOUAL</span><br><br>Collecter les <span class='magic'>9 ARTEFACTS LEGENDAIRES</span><br>Et atteindre la <span class='magic'>CAVERNE DU GLITCH</span>...",
-                
+                "Et dans cette caverne vivrait<br><span class='magic'>DATABASE, LE CHEATER GRIS</span><br><br>Gardien des codes oublies...<br>Lui seul pourrait lever la malediction !",
+                "En 2024, quatre amis decident d'agir...<br><br><span class='highlight'>METAPIXL</span>",
+                "<span class='character'>JULIEN</span> - L'Expert Linux<br><span class='character'>ORL</span> - Le Couteau Suisse du Retrogaming<br><span class='character'>GWANA</span> - Le Modeur Fou<br><span class='character'>JOE</span> - Le Collectionneur<br><br>Ils retrouvent une disquette maudite...",
+                "Leur mission :<br><br>Traverser la <span class='highlight'>LOZERE</span><br>De <span class='highlight'>MARVEJOLS</span> au <span class='highlight'>MONT AIGOUAL</span><br><br>Collecter les <span class='magic'>9 ARTEFACTS LEGENDAIRES</span>",
                 "Pour que <span class='magic'>DATABASE</span> puisse enfin<br>lever la <span class='villain'>MALEDICTION</span>...<br><br>Et que les gamers du monde entier<br>puissent <span class='highlight'>TERMINER E.T.</span> !<br><br><span class='highlight'>L'AVENTURE COMMENCE...</span>"
             ];
             
@@ -920,31 +1203,23 @@
                 introTyping = true;
                 var i = 0;
                 var tempText = '';
-                var inTag = false;
                 
                 if (introTypeInterval) clearInterval(introTypeInterval);
                 
                 introTypeInterval = setInterval(function() {
                     if (i < text.length) {
-                        var char = text[i];
-                        tempText += char;
-                        
-                        // Gerer les balises HTML
-                        if (char === '<') inTag = true;
-                        if (char === '>') inTag = false;
-                        
+                        tempText += text[i];
                         introText.innerHTML = tempText;
                         i++;
                     } else {
                         clearInterval(introTypeInterval);
                         introTyping = false;
                     }
-                }, inTag ? 1 : 35);
+                }, 30);
             }
             
             function advanceIntro() {
                 if (introTyping) {
-                    // Afficher tout le texte immediatement
                     clearInterval(introTypeInterval);
                     document.getElementById('intro-text').innerHTML = introSlides[currentIntroSlide];
                     introTyping = false;
@@ -955,20 +1230,15 @@
                 if (currentIntroSlide < introSlides.length) {
                     typeIntroText(introSlides[currentIntroSlide]);
                 } else {
-                    // Fin de l'intro, arreter musique intro et afficher le menu
                     stopIntroMusic();
                     document.getElementById('intro-screen').classList.add('hidden');
                     document.getElementById('menu-screen').classList.remove('hidden');
                 }
             }
             
-            // Demarrer l'intro et la musique
             typeIntroText(introSlides[0]);
-            
-            // Lancer la musique d'intro automatiquement
             startIntroMusic();
             
-            // Gestion des touches pour l'intro
             document.addEventListener('keydown', function(e) {
                 if (!document.getElementById('intro-screen').classList.contains('hidden')) {
                     if (e.key === ' ' || e.key === 'Enter') {
@@ -978,11 +1248,7 @@
                 }
             });
             
-            document.getElementById('intro-screen').onclick = function() {
-                advanceIntro();
-            };
-            
-            // ===== FIN SYSTEME D'INTRO =====
+            document.getElementById('intro-screen').onclick = advanceIntro;
             
             document.getElementById('music-toggle').onclick = toggleMusic;
             
