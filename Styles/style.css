@@ -128,6 +128,7 @@
         }
         
         .quiz-option:hover, .quiz-option:active { background: #3498db; transform: translateX(5px); }
+        .quiz-option.selected { background: #3498db; transform: translateX(8px); border-color: var(--accent-gold); box-shadow: 0 0 10px rgba(244, 208, 63, 0.5); }
         .quiz-option.correct { background: var(--grass-green); border-color: var(--grass-green); }
         .quiz-option.wrong { background: var(--accent-red); border-color: var(--accent-red); }
         
@@ -245,12 +246,14 @@
             background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
             pointer-events: auto;
             z-index: 200;
+            touch-action: none;
         }
         
         #dpad {
             position: relative;
             width: 120px;
             height: 120px;
+            touch-action: none;
         }
         
         .dpad-btn {
@@ -268,6 +271,7 @@
             cursor: pointer;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none;
         }
         
         .dpad-btn:active { background: rgba(244, 208, 63, 0.6); }
@@ -302,6 +306,7 @@
             cursor: pointer;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none;
         }
         
         #action-btn:active { background: rgba(231, 76, 60, 0.7); }

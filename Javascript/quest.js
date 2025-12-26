@@ -1,4 +1,4 @@
-        // ===== SYSTEME AUDIO =====
+       // ===== SYSTEME AUDIO =====
         var bgMusic = document.getElementById('background-music');
         var introMusic = document.getElementById('intro-music');
         var musicEnabled = true;
@@ -204,7 +204,7 @@
             }
         ];
         
-       var gameState = {
+        var gameState = {
             started: false,
             currentVillage: 0,
             fragments: 0,
@@ -220,6 +220,9 @@
             currentNPC: null,
             inQuiz: false,
             currentQuiz: null,
+            selectedOption: 0,
+            quizSuccess: false,
+            quizVillage: null,
             inventory: [],
             animationTime: 0,
             mapTiles: [],
@@ -698,12 +701,48 @@
         var keys = {};
         document.addEventListener('keydown', function(e) {
             keys[e.key.toLowerCase()] = true;
+            
+            // Navigation dans le quiz
+            if (gameState.inQuiz) {
+                if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'z' || e.key.toLowerCase() === 'w') {
+                    e.preventDefault();
+                    navigateQuiz(-1);
+                } else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') {
+                    e.preventDefault();
+                    navigateQuiz(1);
+                } else if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    handleQuizAction();
+                }
+                return;
+            }
+            
             if (e.key === ' ' || e.key === 'Enter') {
                 e.preventDefault();
                 handleInteraction();
             }
         });
         document.addEventListener('keyup', function(e) { keys[e.key.toLowerCase()] = false; });
+        
+        function handleQuizAction() {
+            var options = document.querySelectorAll('.quiz-option');
+            
+            // Si on est dans l'écran de résultat (pas d'options actives)
+            if (options.length === 0 || (options.length > 0 && options[0].disabled)) {
+                if (gameState.quizSuccess) {
+                    if (gameState.quizVillage && gameState.quizVillage.isFinal) {
+                        showVictory();
+                    } else {
+                        gameState.currentVillage++;
+                    }
+                }
+                closeQuiz();
+                return;
+            }
+            
+            // Sinon valider l'option
+            validateQuizOption();
+        }
         
         // ===== CONTROLES TACTILES =====
         function setupTouchControls() {
@@ -712,7 +751,15 @@
                 var btn = document.getElementById('dpad-' + dir);
                 
                 btn.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
+                    if (e.cancelable) e.preventDefault();
+                    
+                    // Navigation quiz avec D-pad
+                    if (gameState.inQuiz) {
+                        if (dir === 'up') navigateQuiz(-1);
+                        if (dir === 'down') navigateQuiz(1);
+                        return;
+                    }
+                    
                     if (dir === 'up') gameState.touchDir.y = -1;
                     if (dir === 'down') gameState.touchDir.y = 1;
                     if (dir === 'left') gameState.touchDir.x = -1;
@@ -720,7 +767,9 @@
                 }, { passive: false });
                 
                 btn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
+                    if (e.cancelable) e.preventDefault();
+                    if (gameState.inQuiz) return;
+                    
                     if (dir === 'up' || dir === 'down') gameState.touchDir.y = 0;
                     if (dir === 'left' || dir === 'right') gameState.touchDir.x = 0;
                 }, { passive: false });
@@ -728,13 +777,53 @@
                 btn.addEventListener('touchcancel', function(e) {
                     gameState.touchDir = { x: 0, y: 0 };
                 });
+                
+                // Support souris aussi pour test sur desktop
+                btn.addEventListener('mousedown', function(e) {
+                    // Navigation quiz avec D-pad
+                    if (gameState.inQuiz) {
+                        if (dir === 'up') navigateQuiz(-1);
+                        if (dir === 'down') navigateQuiz(1);
+                        return;
+                    }
+                    
+                    if (dir === 'up') gameState.touchDir.y = -1;
+                    if (dir === 'down') gameState.touchDir.y = 1;
+                    if (dir === 'left') gameState.touchDir.x = -1;
+                    if (dir === 'right') gameState.touchDir.x = 1;
+                });
+                
+                btn.addEventListener('mouseup', function(e) {
+                    if (gameState.inQuiz) return;
+                    if (dir === 'up' || dir === 'down') gameState.touchDir.y = 0;
+                    if (dir === 'left' || dir === 'right') gameState.touchDir.x = 0;
+                });
+                
+                btn.addEventListener('mouseleave', function(e) {
+                    if (gameState.inQuiz) return;
+                    if (dir === 'up' || dir === 'down') gameState.touchDir.y = 0;
+                    if (dir === 'left' || dir === 'right') gameState.touchDir.x = 0;
+                });
             });
             
             // Bouton action
-            document.getElementById('action-btn').addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                handleInteraction();
+            var actionBtn = document.getElementById('action-btn');
+            actionBtn.addEventListener('touchstart', function(e) {
+                if (e.cancelable) e.preventDefault();
+                handleActionButton();
             }, { passive: false });
+            
+            actionBtn.addEventListener('mousedown', function(e) {
+                handleActionButton();
+            });
+        }
+        
+        function handleActionButton() {
+            if (gameState.inQuiz) {
+                handleQuizAction();
+            } else {
+                handleInteraction();
+            }
         }
         
         function handleMovement() {
@@ -866,21 +955,64 @@
         function startQuiz(quiz, village) {
             gameState.inQuiz = true;
             gameState.currentQuiz = { quiz: quiz, village: village };
+            gameState.selectedOption = 0;
             
             document.getElementById('quiz-panel').style.display = 'block';
             document.getElementById('quiz-title').textContent = 'ENIGME RETRO';
             document.getElementById('quiz-question').textContent = quiz.question;
+            document.getElementById('quiz-controls-hint').style.display = 'block';
             
             var options = document.getElementById('quiz-options');
             options.innerHTML = '';
             
             quiz.options.forEach(function(opt, i) {
                 var btn = document.createElement('button');
-                btn.className = 'quiz-option';
+                btn.className = 'quiz-option' + (i === 0 ? ' selected' : '');
                 btn.textContent = String.fromCharCode(65 + i) + '. ' + opt;
-                btn.onclick = function() { checkAnswer(i); };
+                btn.setAttribute('data-index', i);
+                btn.onclick = function() { 
+                    selectQuizOption(i);
+                    setTimeout(function() { validateQuizOption(); }, 150);
+                };
                 options.appendChild(btn);
             });
+            
+            playSFX('dialog');
+        }
+        
+        function selectQuizOption(index) {
+            var options = document.querySelectorAll('.quiz-option');
+            var maxIndex = options.length - 1;
+            
+            if (index < 0) index = maxIndex;
+            if (index > maxIndex) index = 0;
+            
+            gameState.selectedOption = index;
+            
+            options.forEach(function(btn, i) {
+                if (i === index) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            
+            playSFX('step');
+        }
+        
+        function navigateQuiz(direction) {
+            if (!gameState.inQuiz) return;
+            var newIndex = gameState.selectedOption + direction;
+            selectQuizOption(newIndex);
+        }
+        
+        function validateQuizOption() {
+            if (!gameState.inQuiz) return;
+            var options = document.querySelectorAll('.quiz-option');
+            if (options.length === 0) return;
+            if (options[0].disabled) return; // Déjà validé
+            
+            checkAnswer(gameState.selectedOption);
         }
         
         function checkAnswer(index) {
@@ -888,8 +1020,12 @@
             var village = gameState.currentQuiz.village;
             var buttons = document.querySelectorAll('.quiz-option');
             
+            // Cacher le hint de contrôles
+            document.getElementById('quiz-controls-hint').style.display = 'none';
+            
             buttons.forEach(function(btn, i) {
                 btn.disabled = true;
+                btn.classList.remove('selected');
                 if (i === quiz.correct) btn.classList.add('correct');
                 else if (i === index) btn.classList.add('wrong');
             });
@@ -904,24 +1040,25 @@
                     
                     document.getElementById('quiz-title').textContent = 'ARTEFACT OBTENU !';
                     document.getElementById('quiz-question').innerHTML = '<span style="color:' + village.artifact.color + '; font-size: 20px;">' + village.artifact.icon + '</span><br><br><span style="color: #f1c40f;">' + village.artifact.name + '</span>';
-                    document.getElementById('quiz-options').innerHTML = '';
+                    document.getElementById('quiz-options').innerHTML = '<p style="font-size: 6px; color: #888; margin-top: 15px;">Appuyez sur ACTION pour continuer</p>';
                     
-                    setTimeout(function() {
-                        if (village.isFinal) showVictory();
-                        else gameState.currentVillage++;
-                        closeQuiz();
-                    }, 2000);
+                    gameState.quizSuccess = true;
+                    gameState.quizVillage = village;
                 }, 1000);
             } else {
                 playSFX('error');
                 document.getElementById('quiz-title').textContent = 'MAUVAISE REPONSE !';
                 document.getElementById('quiz-question').innerHTML = '<span style="color: #e74c3c;">Indice :</span><br><br>' + quiz.hint;
-                document.getElementById('quiz-options').innerHTML = '<button class="quiz-option" onclick="closeQuiz()" style="margin-top: 15px; background: #e74c3c; border-color: #e74c3c;">REESSAYER</button>';
+                document.getElementById('quiz-options').innerHTML = '<p style="font-size: 6px; color: #888; margin-top: 15px;">Appuyez sur ACTION pour reessayer</p>';
+                
+                gameState.quizSuccess = false;
             }
         }
         
         function closeQuiz() {
             gameState.inQuiz = false;
+            gameState.quizSuccess = false;
+            gameState.quizVillage = null;
             document.getElementById('quiz-panel').style.display = 'none';
         }
         
