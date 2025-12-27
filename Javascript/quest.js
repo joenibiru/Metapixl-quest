@@ -282,7 +282,7 @@
             return map;
         }
         
-        // ===== DESSIN TILES AMELIORES =====
+        // ===== DESSIN TILES =====
         function drawTile(x, y, type, time) {
             var px = x * TILE_SIZE - gameState.cameraX;
             var py = y * TILE_SIZE - gameState.cameraY;
@@ -390,7 +390,7 @@
             }
         }
         
-        // ===== SPRITES PERSONNAGES AMELIORES =====
+        // ===== SPRITES PERSONNAGES =====
         function drawCharacter(x, y, char, direction, frame, isPlayer) {
             var px = x - gameState.cameraX;
             var py = y - gameState.cameraY;
@@ -474,7 +474,7 @@
             ctx.fillRect(px + 13, py + 9 + bounce, 6, 1);
         }
         
-        // ===== NPC AMELIORES =====
+        // ===== NPC =====
         function drawNPC(village, index) {
             var px = village.x * TILE_SIZE - gameState.cameraX + 32;
             var py = village.y * TILE_SIZE - gameState.cameraY;
@@ -555,7 +555,7 @@
             }
         }
         
-        // ===== VILLAGES AMELIORES =====
+        // ===== VILLAGES =====
         function drawVillage(village, index) {
             var px = village.x * TILE_SIZE - gameState.cameraX;
             var py = village.y * TILE_SIZE - gameState.cameraY;
